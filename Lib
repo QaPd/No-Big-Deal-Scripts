@@ -269,6 +269,10 @@ function Library:CreateTab(name)
             TweenService:Create(t.Button, TweenInfo.new(0.2), {BackgroundColor3 = Theme.Element}):Play()
             TweenService:Create(t.Label, TweenInfo.new(0.2), {TextColor3 = Theme.Muted}):Play()
             TweenService:Create(t.Icon, TweenInfo.new(0.2), {TextColor3 = Theme.Muted}):Play()
+            local tStroke = t.Button:FindFirstChildOfClass("UIStroke")
+            if tStroke then
+                TweenService:Create(tStroke, TweenInfo.new(0.2), {Transparency = 0.8}):Play()
+            end
             if t.Button:FindFirstChild("Selected") then
                 t.Button.Selected:Destroy()
             end
