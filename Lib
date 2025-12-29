@@ -272,14 +272,16 @@ function Library:CreateTab(name)
             if t.Stroke then
                 TweenService:Create(t.Stroke, TweenInfo.new(0.2), {Transparency = 0.8}):Play()
             end
-            if t.Button:FindFirstChild("Selected") then
-                t.Button.Selected:Destroy()
+            local selectedMarker = t.Button:FindFirstChild("Selected")
+            if selectedMarker then
+                selectedMarker:Destroy()
             end
         end
         
         page.Visible = true
-        local selected = Instance.new("BoolValue", tab)
+        local selected = Instance.new("BoolValue")
         selected.Name = "Selected"
+        selected.Parent = tab
         
         TweenService:Create(tab, TweenInfo.new(0.2), {BackgroundColor3 = Theme.Accent}):Play()
         TweenService:Create(tabLabel, TweenInfo.new(0.2), {TextColor3 = Theme.Text}):Play()
@@ -295,8 +297,9 @@ function Library:CreateTab(name)
 
     if #Library.Tabs == 0 then
         page.Visible = true
-        local selected = Instance.new("BoolValue", tab)
+        local selected = Instance.new("BoolValue")
         selected.Name = "Selected"
+        selected.Parent = tab
         tab.BackgroundColor3 = Theme.Accent
         tabLabel.TextColor3 = Theme.Text
         tabIcon.TextColor3 = Theme.Text
