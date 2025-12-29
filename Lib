@@ -1,11 +1,11 @@
--- RoohrHub UI Library v2 - Enhanced
+-- RoohrHub UI Library v2.5 - Ultimate Edition
 -- Client-side only
-print("RoohrLib v2")
+print("RoohrLib v2.5 Ultimate")
 
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
 -- Enhanced Theme with gradient support
@@ -18,7 +18,16 @@ local Theme = {
     AccentDark = Color3.fromRGB(219, 112, 147),
     Text = Color3.fromRGB(245, 245, 245),
     Muted = Color3.fromRGB(150, 150, 150),
-    Border = Color3.fromRGB(40, 40, 40)
+    Border = Color3.fromRGB(40, 40, 40),
+    Success = Color3.fromRGB(76, 175, 80),
+    Warning = Color3.fromRGB(255, 152, 0),
+    Error = Color3.fromRGB(244, 67, 54)
+}
+
+-- Settings
+local Settings = {
+    SoundsEnabled = true,
+    MinimizeKey = Enum.KeyCode.RightControl
 }
 
 -- Sound ID
@@ -42,7 +51,6 @@ main.Parent = gui
 local mainCorner = Instance.new("UICorner", main)
 mainCorner.CornerRadius = UDim.new(0, 16)
 
--- Add subtle shadow effect
 local mainStroke = Instance.new("UIStroke", main)
 mainStroke.Color = Theme.Border
 mainStroke.Thickness = 1
@@ -58,7 +66,7 @@ top.Parent = main
 local topCorner = Instance.new("UICorner", top)
 topCorner.CornerRadius = UDim.new(0, 16)
 
--- Logo icon with glow effect
+-- Logo
 local logoContainer = Instance.new("Frame")
 logoContainer.Size = UDim2.new(0, 36, 0, 36)
 logoContainer.Position = UDim2.new(0, 8, 0, 7)
@@ -72,9 +80,9 @@ logo.Image = "rbxassetid://97046632760597"
 logo.ImageColor3 = Theme.Accent
 logo.Parent = logoContainer
 
--- Title with better styling
+-- Title
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -60, 1, 0)
+title.Size = UDim2.new(1, -140, 1, 0)
 title.Position = UDim2.new(0, 50, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "RoohrHub"
@@ -86,17 +94,63 @@ title.Parent = top
 
 -- Subtitle
 local subtitle = Instance.new("TextLabel")
-subtitle.Size = UDim2.new(1, -60, 0, 12)
+subtitle.Size = UDim2.new(1, -140, 0, 12)
 subtitle.Position = UDim2.new(0, 50, 0, 28)
 subtitle.BackgroundTransparency = 1
-subtitle.Text = "v2.0 Enhanced"
+subtitle.Text = "v2.5 Ultimate"
 subtitle.Font = Enum.Font.Gotham
 subtitle.TextSize = 11
 subtitle.TextColor3 = Theme.Muted
 subtitle.TextXAlignment = Enum.TextXAlignment.Left
 subtitle.Parent = top
 
--- Animated accent bar with gradient
+-- Minimize Button
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 36, 0, 36)
+minimizeBtn.Position = UDim2.new(1, -44, 0, 7)
+minimizeBtn.BackgroundColor3 = Theme.Element
+minimizeBtn.Text = "−"
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 20
+minimizeBtn.TextColor3 = Theme.Text
+minimizeBtn.AutoButtonColor = false
+minimizeBtn.Parent = top
+
+local minCorner = Instance.new("UICorner", minimizeBtn)
+minCorner.CornerRadius = UDim.new(0, 8)
+
+minimizeBtn.MouseEnter:Connect(function()
+    TweenService:Create(minimizeBtn, TweenInfo.new(0.2), {BackgroundColor3 = Theme.ElementHover}):Play()
+end)
+
+minimizeBtn.MouseLeave:Connect(function()
+    TweenService:Create(minimizeBtn, TweenInfo.new(0.2), {BackgroundColor3 = Theme.Element}):Play()
+end)
+
+local isMinimized = false
+minimizeBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    if isMinimized then
+        TweenService:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+            Size = UDim2.new(0, 250, 0, 50)
+        }):Play()
+        minimizeBtn.Text = "□"
+    else
+        TweenService:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+            Size = UDim2.new(0, 620, 0, 420)
+        }):Play()
+        minimizeBtn.Text = "−"
+    end
+end)
+
+-- Minimize keybind
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Settings.MinimizeKey then
+        minimizeBtn.MouseButton1Click:Fire()
+    end
+end)
+
+-- Animated accent bar
 local accent = Instance.new("Frame")
 accent.Size = UDim2.new(1, 0, 0, 3)
 accent.Position = UDim2.new(0, 0, 1, -3)
@@ -112,7 +166,6 @@ accentGradient.Color = ColorSequence.new({
 })
 accentGradient.Parent = accent
 
--- Animate gradient
 task.spawn(function()
     while accent and accent.Parent do
         TweenService:Create(accentGradient, TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {
@@ -156,11 +209,26 @@ pages.Position = UDim2.new(0, 158, 0, 56)
 pages.BackgroundTransparency = 1
 pages.Parent = main
 
+-- Notification Container
+local notifContainer = Instance.new("Frame")
+notifContainer.Size = UDim2.new(0, 300, 1, 0)
+notifContainer.Position = UDim2.new(1, -310, 0, 10)
+notifContainer.BackgroundTransparency = 1
+notifContainer.Parent = gui
+
+local notifLayout = Instance.new("UIListLayout")
+notifLayout.Padding = UDim.new(0, 8)
+notifLayout.FillDirection = Enum.FillDirection.Vertical
+notifLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+notifLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+notifLayout.SortOrder = Enum.SortOrder.LayoutOrder
+notifLayout.Parent = notifContainer
+
 -- Drag functionality
 do
     local dragging, startPos, startInput
     top.InputBegan:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+        if i.UserInputType == Enum.UserInputType.MouseButton1 and not isMinimized then
             dragging = true
             startInput = i.Position
             startPos = main.Position
@@ -170,7 +238,9 @@ do
     UIS.InputEnded:Connect(function(i)
         if i.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
-            TweenService:Create(main, TweenInfo.new(0.1), {Size = UDim2.new(0, 620, 0, 420)}):Play()
+            if not isMinimized then
+                TweenService:Create(main, TweenInfo.new(0.1), {Size = UDim2.new(0, 620, 0, 420)}):Play()
+            end
         end
     end)
     UIS.InputChanged:Connect(function(i)
@@ -184,8 +254,107 @@ end
 -- Library
 local Library = {}
 Library.Tabs = {}
+Library.Notifications = {}
 
-function Library:CreateTab(name)
+-- Notification System
+function Library:Notify(title, message, duration, notifType)
+    duration = duration or 3
+    notifType = notifType or "info" -- info, success, warning, error
+    
+    local typeColors = {
+        info = Theme.Accent,
+        success = Theme.Success,
+        warning = Theme.Warning,
+        error = Theme.Error
+    }
+    
+    local notif = Instance.new("Frame")
+    notif.Size = UDim2.new(1, 0, 0, 0)
+    notif.BackgroundColor3 = Theme.Panel
+    notif.BorderSizePixel = 0
+    notif.ClipsDescendants = true
+    notif.Parent = notifContainer
+    
+    local notifCorner = Instance.new("UICorner", notif)
+    notifCorner.CornerRadius = UDim.new(0, 10)
+    
+    local notifStroke = Instance.new("UIStroke", notif)
+    notifStroke.Color = typeColors[notifType]
+    notifStroke.Thickness = 2
+    
+    local notifAccent = Instance.new("Frame")
+    notifAccent.Size = UDim2.new(0, 4, 1, 0)
+    notifAccent.BackgroundColor3 = typeColors[notifType]
+    notifAccent.BorderSizePixel = 0
+    notifAccent.Parent = notif
+    
+    local notifTitle = Instance.new("TextLabel")
+    notifTitle.Size = UDim2.new(1, -50, 0, 20)
+    notifTitle.Position = UDim2.new(0, 12, 0, 8)
+    notifTitle.BackgroundTransparency = 1
+    notifTitle.Text = title
+    notifTitle.Font = Enum.Font.GothamBold
+    notifTitle.TextSize = 14
+    notifTitle.TextColor3 = Theme.Text
+    notifTitle.TextXAlignment = Enum.TextXAlignment.Left
+    notifTitle.Parent = notif
+    
+    local notifMessage = Instance.new("TextLabel")
+    notifMessage.Size = UDim2.new(1, -50, 0, 0)
+    notifMessage.Position = UDim2.new(0, 12, 0, 28)
+    notifMessage.BackgroundTransparency = 1
+    notifMessage.Text = message
+    notifMessage.Font = Enum.Font.Gotham
+    notifMessage.TextSize = 12
+    notifMessage.TextColor3 = Theme.Muted
+    notifMessage.TextXAlignment = Enum.TextXAlignment.Left
+    notifMessage.TextWrapped = true
+    notifMessage.TextYAlignment = Enum.TextYAlignment.Top
+    notifMessage.Parent = notif
+    
+    -- Calculate height based on text
+    local textHeight = game:GetService("TextService"):GetTextSize(
+        message, 12, Enum.Font.Gotham, Vector2.new(notifMessage.AbsoluteSize.X, math.huge)
+    ).Y
+    
+    local totalHeight = math.max(60, textHeight + 45)
+    notifMessage.Size = UDim2.new(1, -50, 0, textHeight)
+    
+    -- Close button
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 20, 0, 20)
+    closeBtn.Position = UDim2.new(1, -28, 0, 8)
+    closeBtn.BackgroundTransparency = 1
+    closeBtn.Text = "×"
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 18
+    closeBtn.TextColor3 = Theme.Muted
+    closeBtn.Parent = notif
+    
+    -- Animate in
+    TweenService:Create(notif, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+        Size = UDim2.new(1, 0, 0, totalHeight)
+    }):Play()
+    
+    -- Auto close
+    local closeNotif = function()
+        TweenService:Create(notif, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+            Size = UDim2.new(1, 0, 0, 0)
+        }):Play()
+        task.wait(0.3)
+        notif:Destroy()
+    end
+    
+    closeBtn.MouseButton1Click:Connect(closeNotif)
+    
+    task.delay(duration, closeNotif)
+    
+    table.insert(Library.Notifications, notif)
+end
+
+function Library:CreateTab(name, icon)
+    icon = icon or "●"
+    
     local tab = Instance.new("TextButton")
     tab.Size = UDim2.new(1, 0, 0, 38)
     tab.Text = ""
@@ -202,18 +371,16 @@ function Library:CreateTab(name)
     tabStroke.Thickness = 1
     tabStroke.Transparency = 0.8
     
-    -- Tab icon (optional - you can customize per tab)
     local tabIcon = Instance.new("TextLabel")
     tabIcon.Size = UDim2.new(0, 20, 0, 20)
     tabIcon.Position = UDim2.new(0, 10, 0.5, -10)
     tabIcon.BackgroundTransparency = 1
-    tabIcon.Text = "●"
+    tabIcon.Text = icon
     tabIcon.Font = Enum.Font.GothamBold
     tabIcon.TextSize = 16
     tabIcon.TextColor3 = Theme.Muted
     tabIcon.Parent = tab
     
-    -- Tab text
     local tabLabel = Instance.new("TextLabel")
     tabLabel.Size = UDim2.new(1, -40, 1, 0)
     tabLabel.Position = UDim2.new(0, 35, 0, 0)
@@ -225,7 +392,6 @@ function Library:CreateTab(name)
     tabLabel.TextXAlignment = Enum.TextXAlignment.Left
     tabLabel.Parent = tab
 
-    -- Hover effect
     tab.MouseEnter:Connect(function()
         if not tab:FindFirstChild("Selected") then
             TweenService:Create(tab, TweenInfo.new(0.2), {BackgroundColor3 = Theme.ElementHover}):Play()
@@ -238,7 +404,6 @@ function Library:CreateTab(name)
         end
     end)
 
-    -- Create scrollable page
     local page = Instance.new("ScrollingFrame")
     page.Size = UDim2.new(1, 0, 1, 0)
     page.Visible = false
@@ -257,7 +422,6 @@ function Library:CreateTab(name)
     pagePadding.PaddingRight = UDim.new(0, 8)
     pagePadding.Parent = page
 
-    -- Layout for page content
     local layout = Instance.new("UIListLayout")
     layout.Padding = UDim.new(0, 8)
     layout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -288,11 +452,13 @@ function Library:CreateTab(name)
         TweenService:Create(tabIcon, TweenInfo.new(0.2), {TextColor3 = Theme.Text}):Play()
         TweenService:Create(tabStroke, TweenInfo.new(0.2), {Transparency = 0.3}):Play()
         
-        local s = Instance.new("Sound", top)
-        s.SoundId = clickSoundId
-        s.Volume = 0.3
-        s:Play()
-        game:GetService("Debris"):AddItem(s, 1)
+        if Settings.SoundsEnabled then
+            local s = Instance.new("Sound", top)
+            s.SoundId = clickSoundId
+            s.Volume = 0.3
+            s:Play()
+            game:GetService("Debris"):AddItem(s, 1)
+        end
     end)
 
     if #Library.Tabs == 0 then
@@ -312,6 +478,16 @@ function Library:CreateTab(name)
     Tab.Label = tabLabel
     Tab.Icon = tabIcon
     Tab.Stroke = tabStroke
+
+    local function playSound()
+        if Settings.SoundsEnabled then
+            local s = Instance.new("Sound", top)
+            s.SoundId = clickSoundId
+            s.Volume = 0.3
+            s:Play()
+            game:GetService("Debris"):AddItem(s, 1)
+        end
+    end
 
     local function makeButton(text)
         local b = Instance.new("TextButton")
@@ -341,7 +517,6 @@ function Library:CreateTab(name)
         bLabel.TextXAlignment = Enum.TextXAlignment.Left
         bLabel.Parent = b
         
-        -- Hover effect
         b.MouseEnter:Connect(function()
             TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = Theme.ElementHover}):Play()
         end)
@@ -356,12 +531,7 @@ function Library:CreateTab(name)
             TweenService:Create(b, TweenInfo.new(0.1), {Size = UDim2.new(1, -4, 0, 40)}):Play()
             task.wait(0.1)
             TweenService:Create(b, TweenInfo.new(0.1), {Size = UDim2.new(1, 0, 0, 42)}):Play()
-            
-            local s = Instance.new("Sound", top)
-            s.SoundId = clickSoundId
-            s.Volume = 0.3
-            s:Play()
-            game:GetService("Debris"):AddItem(s, 1)
+            playSound()
         end)
         
         return b, bLabel
@@ -372,13 +542,13 @@ function Library:CreateTab(name)
         b.MouseButton1Click:Connect(function()
             if cb then cb() end
         end)
+        return b
     end
 
     function Tab:AddToggle(text, default, cb)
         local state = default or false
         local b, bLabel = makeButton(text)
         
-        -- Toggle indicator
         local indicator = Instance.new("Frame")
         indicator.Size = UDim2.new(0, 44, 0, 24)
         indicator.Position = UDim2.new(1, -52, 0.5, -12)
@@ -425,6 +595,7 @@ function Library:CreateTab(name)
         end
         
         b.MouseButton1Click:Connect(update)
+        return b, indicator
     end
 
     function Tab:AddSlider(sliderText, min, max, default, cb)
@@ -485,7 +656,6 @@ function Library:CreateTab(name)
         local barCorner = Instance.new("UICorner", sliderBar)
         barCorner.CornerRadius = UDim.new(1, 0)
         
-        -- Gradient on slider bar
         local barGradient = Instance.new("UIGradient", sliderBar)
         barGradient.Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Theme.AccentDark),
@@ -523,7 +693,7 @@ function Library:CreateTab(name)
             end
         end)
         
-        game:GetService("RunService").RenderStepped:Connect(function()
+        RunService.RenderStepped:Connect(function()
             if dragging then
                 local relativeX = math.clamp(mouse.X - sliderBarBg.AbsolutePosition.X, 0, sliderBarBg.AbsoluteSize.X)
                 local scale = relativeX / sliderBarBg.AbsoluteSize.X
@@ -537,6 +707,46 @@ function Library:CreateTab(name)
                 if cb then cb(value) end
             end
         end)
+        
+        return sliderFrame, valueLabel
+    end
+
+    function Tab:AddKeybind(text, default, cb)
+        local currentKey = default or Enum.KeyCode.Unknown
+        local listening = false
+        
+        local b, bLabel = makeButton(text)
+        
+        local keybindDisplay = Instance.new("TextLabel")
+        keybindDisplay.Size = UDim2.new(0, 60, 0, 26)
+        keybindDisplay.Position = UDim2.new(1, -70, 0.5, -13)
+        keybindDisplay.BackgroundColor3 = Theme.Panel
+        keybindDisplay.Text = currentKey.Name
+        keybindDisplay.Font = Enum.Font.GothamBold
+        keybindDisplay.TextSize = 12
+        keybindDisplay.TextColor3 = Theme.Accent
+        keybindDisplay.Parent = b
+        
+        local keyCorner = Instance.new("UICorner", keybindDisplay)
+        keyCorner.CornerRadius = UDim.new(0, 6)
+        
+        b.MouseButton1Click:Connect(function()
+            listening = true
+            keybindDisplay.Text = "..."
+            TweenService:Create(keybindDisplay, TweenInfo.new(0.2), {BackgroundColor3 = Theme.Accent}):Play()
+        end)
+        
+        UIS.InputBegan:Connect(function(input, gameProcessed)
+            if listening and input.UserInputType == Enum.UserInputType.Keyboard then
+                currentKey = input.KeyCode
+                keybindDisplay.Text = currentKey.Name
+                listening = false
+                TweenService:Create(keybindDisplay, TweenInfo.new(0.2), {BackgroundColor3 = Theme.Panel}):Play()
+                if cb then cb(currentKey) end
+            end
+        end)
+        
+        return b, keybindDisplay
     end
 
     function Tab:AddDropdown(text, options, cb)
@@ -602,6 +812,7 @@ function Library:CreateTab(name)
                 open = false
                 TweenService:Create(dropdownFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 0)}):Play()
                 TweenService:Create(arrow, TweenInfo.new(0.2), {Rotation = 0}):Play()
+                playSound()
             end)
         end
     
@@ -643,7 +854,6 @@ function Library:CreateTab(name)
         box.ClearTextOnFocus = false
         box.Parent = inputFrame
         
-        -- Focus effects
         box.Focused:Connect(function()
             TweenService:Create(inputStroke, TweenInfo.new(0.2), {Color = Theme.Accent, Transparency = 0.3}):Play()
         end)
@@ -658,6 +868,8 @@ function Library:CreateTab(name)
             end
             if cb then cb(v) end
         end)
+        
+        return inputFrame, box
     end
     
     function Tab:AddLabel(text)
@@ -688,9 +900,40 @@ function Library:CreateTab(name)
         
         return divider
     end
+    
+    function Tab:AddColorPicker(text, default, cb)
+        default = default or Color3.fromRGB(255, 255, 255)
+        
+        local b, bLabel = makeButton(text)
+        
+        local colorPreview = Instance.new("Frame")
+        colorPreview.Size = UDim2.new(0, 32, 0, 26)
+        colorPreview.Position = UDim2.new(1, -42, 0.5, -13)
+        colorPreview.BackgroundColor3 = default
+        colorPreview.BorderSizePixel = 0
+        colorPreview.Parent = b
+        
+        local previewCorner = Instance.new("UICorner", colorPreview)
+        previewCorner.CornerRadius = UDim.new(0, 6)
+        
+        local previewStroke = Instance.new("UIStroke", colorPreview)
+        previewStroke.Color = Theme.Border
+        previewStroke.Thickness = 1
+        
+        b.MouseButton1Click:Connect(function()
+            Library:Notify("Color Picker", "RGB: " .. math.floor(default.R * 255) .. ", " .. math.floor(default.G * 255) .. ", " .. math.floor(default.B * 255), 2, "info")
+        end)
+        
+        return b, colorPreview
+    end
 
     table.insert(Library.Tabs, Tab)
     return Tab
 end
+
+-- Initialize with welcome notification
+task.delay(0.5, function()
+    Library:Notify("Welcome!", "RoohrHub v2.5 Ultimate loaded successfully", 3, "success")
+end)
 
 return Library
