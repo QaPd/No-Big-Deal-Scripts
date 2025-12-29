@@ -14,8 +14,8 @@ local Theme = {
     Panel = Color3.fromRGB(20, 20, 20),
     Element = Color3.fromRGB(28, 28, 28),
     ElementHover = Color3.fromRGB(35, 35, 35),
-    Accent = Color3.fromHex("#85144B"),
-    AccentDark = Color3.fromHex("#6B0F3C"),
+    Accent = Color3.fromRGB(255, 105, 180),
+    AccentDark = Color3.fromRGB(219, 112, 147),
     Text = Color3.fromRGB(245, 245, 245),
     Muted = Color3.fromRGB(150, 150, 150),
     Border = Color3.fromRGB(40, 40, 40)
@@ -269,9 +269,8 @@ function Library:CreateTab(name)
             TweenService:Create(t.Button, TweenInfo.new(0.2), {BackgroundColor3 = Theme.Element}):Play()
             TweenService:Create(t.Label, TweenInfo.new(0.2), {TextColor3 = Theme.Muted}):Play()
             TweenService:Create(t.Icon, TweenInfo.new(0.2), {TextColor3 = Theme.Muted}):Play()
-            local tStroke = t.Button:FindFirstChildOfClass("UIStroke")
-            if tStroke then
-                TweenService:Create(tStroke, TweenInfo.new(0.2), {Transparency = 0.8}):Play()
+            if t.Stroke then
+                TweenService:Create(t.Stroke, TweenInfo.new(0.2), {Transparency = 0.8}):Play()
             end
             if t.Button:FindFirstChild("Selected") then
                 t.Button.Selected:Destroy()
@@ -309,6 +308,7 @@ function Library:CreateTab(name)
     Tab.Button = tab
     Tab.Label = tabLabel
     Tab.Icon = tabIcon
+    Tab.Stroke = tabStroke
 
     local function makeButton(text)
         local b = Instance.new("TextButton")
