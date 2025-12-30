@@ -289,19 +289,19 @@ minConnections:Add(minimizeBtn.MouseButton1Click:Connect(function()
             Size = UDim2.new(0, CONSTANTS.MINIMIZED_SIZE.X, 0, CONSTANTS.MINIMIZED_SIZE.Y)
         }, 0.3)
         minimizeBtn.Text = "□"
-        tabs.Visible = false
-        pages.Visible = false
-        profileFrame.Visible = false
-        accent.Visible = false
+        if tabs then tabs.Visible = false end
+        if pages then pages.Visible = false end
+        if profileFrame then profileFrame.Visible = false end
+        if accent then accent.Visible = false end
     else
         Utils.Tween(main, {
             Size = UDim2.new(0, CONSTANTS.MAIN_SIZE.X, 0, CONSTANTS.MAIN_SIZE.Y)
         }, 0.3)
         minimizeBtn.Text = "−"
-        tabs.Visible = true
-        pages.Visible = true
-        profileFrame.Visible = true
-        accent.Visible = true
+        if tabs then tabs.Visible = true end
+        if pages then pages.Visible = true end
+        if profileFrame then profileFrame.Visible = true end
+        if accent then accent.Visible = true end
     end
     Utils.PlaySound()
 end))
