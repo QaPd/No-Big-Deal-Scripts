@@ -1100,116 +1100,109 @@ function Library:CreateTab(name, icon)
     end
     
     -- Add Keybind
-    function Tab:AddKeybind(text, default, callback)
-        local currentKey = default or Enum.KeyCode.Unknown
-        local listening = false
-        
-        local btn, label, hoverConn, leaveConn = createButton(text)
-        
-        Tab.Connections:Add(hoverConn)
-        Tab.Connections:Add(leaveConn)
-        
-        -- Keybind display button
-        local keybindBtn = Instance.new("TextButton")
-        keybindBtn.Size = UDim2.new(0, 80, 0, 28)
-        keybindBtn.Position = UDim2.new(1, -88, 0.5, -14)
-        keybindBtn.BackgroundColor3 = Theme.Panel
-        keybindBtn.BorderSizePixel = 0
-        keybindBtn.Text = currentKey.Name
-        keybindBtn.Font = Enum.Font.GothamBold
-        keybindBtn.TextSize = 12
-        keybindBtn.TextColor3 = Theme.Accent
-        keybindBtn.AutoButtonColor = false
-        keybindBtn.Parent = btn
-        
-        Utils.CreateCorner(keybindBtn, UDim.new(0, 6))
-        Utils.CreateStroke(keybindBtn, Theme.Accent, 1, 0.5)
-        
-        -- Function to get key name display
-        local function getKeyDisplay(key)
-            if key == Enum.KeyCode.Unknown then
-                return "None"
-            end
-            
-            -- Simplify some key names
-            local keyName = key.Name
-            if keyName:match("^Left") then
-                return "L" .. keyName:gsub("^Left", "")
-            elseif keyName:match("^Right") then
-                return "R" .. keyName:gsub("^Right", "")
-            end
-            
-            return keyName
+function Tab:AddKeybind(text, default, callback)
+    local currentKey = default or Enum.KeyCode.Unknown
+    local listening = false
+    
+    local btn, label, hoverConn, leaveConn = createButton(text)
+    
+    Tab.Connections:Add(hoverConn)
+    Tab.Connections:Add(leaveConn)
+    
+    -- Keybind display button
+    local keybindBtn = Instance.new("TextButton")
+    keybindBtn.Size = UDim2.new(0, 80, 0, 28)
+    keybindBtn.Position = UDim2.new(1, -88, 0.5, -14)
+    keybindBtn.BackgroundColor3 = Theme.Panel
+    keybindBtn.BorderSizePixel = 0
+    keybindBtn.Text = currentKey.Name
+    keybindBtn.Font = Enum.Font.GothamBold
+    keybindBtn.TextSize = 12
+    keybindBtn.TextColor3 = Theme.Accent
+    keybindBtn.AutoButtonColor = false
+    keybindBtn.Parent = btn
+    
+    Utils.CreateCorner(keybindBtn, UDim.new(0, 6))
+    Utils.CreateStroke(keybindBtn, Theme.Accent, 1, 0.5)
+    
+    -- Function to get key name display
+    local function getKeyDisplay(key)
+        if key == Enum.KeyCode.Unknown then
+            return "None"
         end
         
-        -- Update display
-        local function updateDisplay()
-            keybindBtn.Text = getKeyDisplay(currentKey)
+        -- Simplify some key names
+        local keyName = key.Name
+        if keyName:match("^Left") then
+            return "L" .. keyName:gsub("^Left", "")
+        elseif keyName:match("^Right") then
+            return "R" .. keyName:gsub("^Right", "")
         end
         
-        -- Keybind button click to start listening
-        Tab.Connections:Add(keybindBtn.MouseButton1Click:Connect(function()
-            listening = true
-            keybindBtn.Text = "..."
-            Utils.Tween(keybindBtn, {BackgroundColor3 = Theme.Accent})
-            Utils.Tween(keybindBtn, {TextColor3 = Theme.Text})
-            Utils.PlaySound()
-        end))
-        
-        -- Hover effects for keybind button
-        Tab.Connections:Add(keybindBtn.MouseEnter:Connect(function()
-            if not listening then
-                Utils.Tween(keybindBtn, {BackgroundColor3 = Theme.Element}, 0.15)
-            end
-        end))
-        
-        Tab.Connections:Add(keybindBtn.MouseLeave:Connect(function()
-            if not listening then
-                Utils.Tween(keybindBtn, {BackgroundColor3 = Theme.Panel}, 0.15)
-            end
-        end))
-        
-        -- Listen for key input
-        Tab.Connections:Add(UIS.InputBegan:Connect(function(input, gameProcessed)
-            if listening then
-                if input.UserInputType == Enum.UserInputType.Keyboard then
-                    -- Allow clearing with Escape or Backspace
-                    if input.KeyCode == Enum.KeyCode.Escape or input.KeyCode == Enum.KeyCode.Backspace then
-                        currentKey = Enum.KeyCode.Unknown
-                    else
-                        currentKey = input.KeyCode
-                    end
-                    
-                    listening = false
-                    updateDisplay()
-                    Utils.Tween(keybindBtn, {BackgroundColor3 = Theme.Panel})
-                    Utils.Tween(keybindBtn, {TextColor3 = Theme.Accent})
-                    Utils.PlaySound()
-                    
-                    if callback then
-                        pcall(callback, currentKey)
-                    end
+        return keyName
+    end
+    
+    -- Update display
+    local function updateDisplay()
+        keybindBtn.Text = getKeyDisplay(currentKey)
+    end
+    
+    -- Keybind button click to start listening
+    Tab.Connections:Add(keybindBtn.MouseButton1Click:Connect(function()
+        listening = true
+        keybindBtn.Text = "..."
+        Utils.Tween(keybindBtn, {BackgroundColor3 = Theme.Accent})
+        Utils.Tween(keybindBtn, {TextColor3 = Theme.Text})
+        Utils.PlaySound()
+    end))
+    
+    -- Hover effects for keybind button
+    Tab.Connections:Add(keybindBtn.MouseEnter:Connect(function()
+        if not listening then
+            Utils.Tween(keybindBtn, {BackgroundColor3 = Theme.Element}, 0.15)
+        end
+    end))
+    
+    Tab.Connections:Add(keybindBtn.MouseLeave:Connect(function()
+        if not listening then
+            Utils.Tween(keybindBtn, {BackgroundColor3 = Theme.Panel}, 0.15)
+        end
+    end))
+    
+    -- Listen for key input
+    Tab.Connections:Add(UIS.InputBegan:Connect(function(input, gameProcessed)
+        if listening then
+            if input.UserInputType == Enum.UserInputType.Keyboard then
+                -- Allow clearing with Escape or Backspace
+                if input.KeyCode == Enum.KeyCode.Escape or input.KeyCode == Enum.KeyCode.Backspace then
+                    currentKey = Enum.KeyCode.Unknown
+                else
+                    currentKey = input.KeyCode
                 end
-            elseif not gameProcessed and currentKey ~= Enum.KeyCode.Unknown and input.KeyCode == currentKey then
-                -- Trigger the keybind
+                
+                listening = false
+                updateDisplay()
+                Utils.Tween(keybindBtn, {BackgroundColor3 = Theme.Panel})
+                Utils.Tween(keybindBtn, {TextColor3 = Theme.Accent})
+                Utils.PlaySound()
+                
                 if callback then
                     pcall(callback, currentKey)
                 end
             end
-        end))
-        
-        updateDisplay()
-        
-        return btn, {
-            SetKey = function(key)
-                currentKey = key or Enum.KeyCode.Unknown
-                updateDisplay()
-            end,
-            GetKey = function()
-                return currentKey
+        -- CHANGED: Only trigger if gameProcessed is false AND the key matches
+        elseif not gameProcessed and currentKey ~= Enum.KeyCode.Unknown and input.KeyCode == currentKey then
+            -- Trigger the keybind callback (this executes the actual keybind action)
+            if callback then
+                pcall(callback, currentKey)
             end
-        }
-    end
+        end
+    end))
+    
+    updateDisplay()
+    
+    return btn, keybindBtn  -- CHANGED: Return the keybind button instead of controls table
+end
     
     -- Add more components (input, dropdown, color picker) would follow similar improvements
     
