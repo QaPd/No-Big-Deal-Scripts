@@ -188,20 +188,6 @@ main.Parent = gui
 Utils.CreateCorner(main, UDim.new(0, 16))
 Utils.CreateStroke(main, Theme.Border, 1, 0.5)
 
--- Add shadow effect
-local shadow = Instance.new("ImageLabel")
-shadow.Size = UDim2.new(1, 20, 1, 20)
-shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
-shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-shadow.BackgroundTransparency = 1
-shadow.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
-shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-shadow.ImageTransparency = 0.7
-shadow.ScaleType = Enum.ScaleType.Slice
-shadow.SliceCenter = Rect.new(10, 10, 10, 10)
-shadow.ZIndex = -1
-shadow.Parent = main
-
 -- Top Bar
 local top = Instance.new("Frame")
 top.Size = UDim2.new(1, 0, 0, 50)
@@ -232,15 +218,6 @@ logo.BackgroundTransparency = 1
 logo.Image = "rbxassetid://97046632760597"
 logo.ImageColor3 = Theme.Accent
 logo.Parent = logoContainer
-
--- Rotate logo animation
-task.spawn(function()
-    while logo and logo.Parent do
-        Utils.Tween(logo, {Rotation = 360}, 10, Enum.EasingStyle.Linear)
-        task.wait(10)
-        logo.Rotation = 0
-    end
-end)
 
 -- Title
 local title = Instance.new("TextLabel")
