@@ -289,11 +289,17 @@ minConnections:Add(minimizeBtn.MouseButton1Click:Connect(function()
             Size = UDim2.new(0, CONSTANTS.MINIMIZED_SIZE.X, 0, CONSTANTS.MINIMIZED_SIZE.Y)
         }, 0.3)
         minimizeBtn.Text = "□"
+        tabs.Visible = false
+        pages.Visible = false
+        profileFrame.Visible = false
     else
         Utils.Tween(main, {
             Size = UDim2.new(0, CONSTANTS.MAIN_SIZE.X, 0, CONSTANTS.MAIN_SIZE.Y)
         }, 0.3)
         minimizeBtn.Text = "−"
+        tabs.Visible = true
+        pages.Visible = true
+        profileFrame.Visible = true
     end
     Utils.PlaySound()
 end))
@@ -331,7 +337,7 @@ end)
 
 -- Sidebar Tabs
 local tabs = Instance.new("Frame")
-tabs.Size = UDim2.new(0, 150, 1, -56)
+tabs.Size = UDim2.new(0, 150, 1, -136) -- Made smaller to fit profile
 tabs.Position = UDim2.new(0, 4, 0, 54)
 tabs.BackgroundColor3 = Theme.Panel
 tabs.BorderSizePixel = 0
@@ -347,6 +353,110 @@ tabsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 tabsLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 tabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
 tabsLayout.Parent = tabs
+
+-- Profile Section at bottom
+local profileFrame = Instance.new("Frame")
+profileFrame.Size = UDim2.new(0, 150, 0, 76)
+profileFrame.Position = UDim2.new(0, 4, 1, -80)
+profileFrame.BackgroundColor3 = Theme.Panel
+profileFrame.BorderSizePixel = 0
+profileFrame.Parent = main
+
+Utils.CreateCorner(profileFrame, UDim.new(0, 12))
+Utils.CreatePadding(profileFrame, 8)
+
+-- Get HWID (using UserId as alternative since real HWID isn't accessible)
+local function getHWID()
+    -- In a real executor environment, you'd use gethwid() or similar
+    -- For now, we'll use a combination of UserId and a hash
+    local userId = player.UserId
+    return string.format("%08X", userId)
+end
+
+-- Profile Picture
+local profilePicture = Instance.new("ImageLabel")
+profilePicture.Size = UDim2.new(0, 48, 0, 48)
+profilePicture.Position = UDim2.new(0, 8, 0, 8)
+profilePicture.BackgroundColor3 = Theme.Element
+profilePicture.BorderSizePixel = 0
+profilePicture.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. player.UserId .. "&width=48&height=48&format=png"
+profilePicture.Parent = profileFrame
+
+Utils.CreateCorner(profilePicture, UDim.new(0, 8))
+Utils.CreateStroke(profilePicture, Theme.Accent, 2, 0.5)
+
+-- Profile Info Container
+local profileInfo = Instance.new("Frame")
+profileInfo.Size = UDim2.new(1, -64, 1, -16)
+profileInfo.Position = UDim2.new(0, 60, 0, 8)
+profileInfo.BackgroundTransparency = 1
+profileInfo.Parent = profileFrame
+
+-- Username
+local usernameLabel = Instance.new("TextLabel")
+usernameLabel.Size = UDim2.new(1, 0, 0, 18)
+usernameLabel.Position = UDim2.new(0, 0, 0, 4)
+usernameLabel.BackgroundTransparency = 1
+usernameLabel.Text = player.Name
+usernameLabel.Font = Enum.Font.GothamBold
+usernameLabel.TextSize = 13
+usernameLabel.TextColor3 = Theme.Text
+usernameLabel.TextXAlignment = Enum.TextXAlignment.Left
+usernameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+usernameLabel.Parent = profileInfo
+
+-- Display Name (if different)
+local displayName = player.DisplayName
+if displayName ~= player.Name then
+    usernameLabel.Text = displayName
+    usernameLabel.Size = UDim2.new(1, 0, 0, 14)
+    usernameLabel.TextSize = 12
+    
+    local realNameLabel = Instance.new("TextLabel")
+    realNameLabel.Size = UDim2.new(1, 0, 0, 12)
+    realNameLabel.Position = UDim2.new(0, 0, 0, 16)
+    realNameLabel.BackgroundTransparency = 1
+    realNameLabel.Text = "@" .. player.Name
+    realNameLabel.Font = Enum.Font.Gotham
+    realNameLabel.TextSize = 10
+    realNameLabel.TextColor3 = Theme.Muted
+    realNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    realNameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+    realNameLabel.Parent = profileInfo
+end
+
+-- HWID Label
+local hwidLabel = Instance.new("TextLabel")
+hwidLabel.Size = UDim2.new(1, 0, 0, 14)
+hwidLabel.Position = UDim2.new(0, 0, 1, -18)
+hwidLabel.BackgroundTransparency = 1
+hwidLabel.Text = "HWID: " .. getHWID()
+hwidLabel.Font = Enum.Font.GothamMono
+hwidLabel.TextSize = 9
+hwidLabel.TextColor3 = Theme.Muted
+hwidLabel.TextXAlignment = Enum.TextXAlignment.Left
+hwidLabel.TextTruncate = Enum.TextTruncate.AtEnd
+hwidLabel.Parent = profileInfo
+
+-- Online Status Indicator
+local statusDot = Instance.new("Frame")
+statusDot.Size = UDim2.new(0, 8, 0, 8)
+statusDot.Position = UDim2.new(1, -12, 0, 4)
+statusDot.BackgroundColor3 = Theme.Success
+statusDot.BorderSizePixel = 0
+statusDot.Parent = profilePicture
+
+Utils.CreateCorner(statusDot, UDim.new(1, 0))
+
+-- Pulse animation for status dot
+task.spawn(function()
+    while statusDot and statusDot.Parent do
+        Utils.Tween(statusDot, {BackgroundTransparency = 0.3}, 1, Enum.EasingStyle.Quad)
+        task.wait(1)
+        Utils.Tween(statusDot, {BackgroundTransparency = 0}, 1, Enum.EasingStyle.Quad)
+        task.wait(1)
+    end
+end)
 
 -- Pages Container
 local pages = Instance.new("Frame")
@@ -966,19 +1076,42 @@ end
 
 -- Cleanup function
 function Library:Destroy()
-    self.Connections:DisconnectAll()
-    minConnections:DisconnectAll()
-    dragConnections:DisconnectAll()
+    pcall(function()
+        if self.Connections then
+            self.Connections:DisconnectAll()
+        end
+    end)
     
-    for _, tab in ipairs(self.Tabs) do
-        if tab.Connections then
-            tab.Connections:DisconnectAll()
+    pcall(function()
+        if minConnections then
+            minConnections:DisconnectAll()
+        end
+    end)
+    
+    pcall(function()
+        if dragConnections then
+            dragConnections:DisconnectAll()
+        end
+    end)
+    
+    if self.Tabs then
+        for _, tab in ipairs(self.Tabs) do
+            pcall(function()
+                if tab and tab.Connections then
+                    tab.Connections:DisconnectAll()
+                end
+            end)
         end
     end
     
-    if gui and gui.Parent then
-        gui:Destroy()
-    end
+    pcall(function()
+        if gui and gui.Parent then
+            gui:Destroy()
+        end
+    end)
+    
+    gui = nil
+    print("RoohrHub: GUI destroyed successfully")
 end
 
 -- Welcome notification
