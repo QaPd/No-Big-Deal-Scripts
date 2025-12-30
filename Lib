@@ -273,45 +273,7 @@ Utils.CreateCorner(minimizeBtn, UDim.new(0, 8))
 
 local minConnections = ConnectionManager.new()
 
-minConnections:Add(minimizeBtn.MouseEnter:Connect(function()
-    Utils.Tween(minimizeBtn, {BackgroundColor3 = Theme.ElementHover})
-end))
-
-minConnections:Add(minimizeBtn.MouseLeave:Connect(function()
-    Utils.Tween(minimizeBtn, {BackgroundColor3 = Theme.Element})
-end))
-
-local isMinimized = false
-minConnections:Add(minimizeBtn.MouseButton1Click:Connect(function()
-    isMinimized = not isMinimized
-    if isMinimized then
-        Utils.Tween(main, {
-            Size = UDim2.new(0, CONSTANTS.MINIMIZED_SIZE.X, 0, CONSTANTS.MINIMIZED_SIZE.Y)
-        }, 0.3)
-        minimizeBtn.Text = "□"
-        if tabs then tabs.Visible = false end
-        if pages then pages.Visible = false end
-        if profileFrame then profileFrame.Visible = false end
-        if accent then accent.Visible = false end
-    else
-        Utils.Tween(main, {
-            Size = UDim2.new(0, CONSTANTS.MAIN_SIZE.X, 0, CONSTANTS.MAIN_SIZE.Y)
-        }, 0.3)
-        minimizeBtn.Text = "−"
-        if tabs then tabs.Visible = true end
-        if pages then pages.Visible = true end
-        if profileFrame then profileFrame.Visible = true end
-        if accent then accent.Visible = true end
-    end
-    Utils.PlaySound()
-end))
-
--- Minimize keybind
-minConnections:Add(UIS.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Settings.MinimizeKey then
-        minimizeBtn.MouseButton1Click:Fire()
-    end
-end))
+-- Minimize connections will be set up after all UI elements are created
 
 -- Animated Accent Bar
 local accent = Instance.new("Frame")
@@ -484,6 +446,7 @@ notifLayout.Parent = notifContainer
 
 -- Drag Functionality
 local dragConnections = ConnectionManager.new()
+local isMinimized = false  -- Define here so drag code can use it
 do
     local dragging, startPos, startInput
     
@@ -512,6 +475,46 @@ do
         end
     end))
 end
+
+-- Setup minimize button connections (after all UI elements are created)
+minConnections:Add(minimizeBtn.MouseEnter:Connect(function()
+    Utils.Tween(minimizeBtn, {BackgroundColor3 = Theme.ElementHover})
+end))
+
+minConnections:Add(minimizeBtn.MouseLeave:Connect(function()
+    Utils.Tween(minimizeBtn, {BackgroundColor3 = Theme.Element})
+end))
+
+minConnections:Add(minimizeBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    if isMinimized then
+        Utils.Tween(main, {
+            Size = UDim2.new(0, CONSTANTS.MINIMIZED_SIZE.X, 0, CONSTANTS.MINIMIZED_SIZE.Y)
+        }, 0.3)
+        minimizeBtn.Text = "□"
+        tabs.Visible = false
+        pages.Visible = false
+        profileFrame.Visible = false
+        accent.Visible = false
+    else
+        Utils.Tween(main, {
+            Size = UDim2.new(0, CONSTANTS.MAIN_SIZE.X, 0, CONSTANTS.MAIN_SIZE.Y)
+        }, 0.3)
+        minimizeBtn.Text = "−"
+        tabs.Visible = true
+        pages.Visible = true
+        profileFrame.Visible = true
+        accent.Visible = true
+    end
+    Utils.PlaySound()
+end))
+
+-- Minimize keybind
+minConnections:Add(UIS.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Settings.MinimizeKey then
+        minimizeBtn.MouseButton1Click:Fire()
+    end
+end))
 
 -- Library Object
 local Library = {}
