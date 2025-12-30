@@ -487,24 +487,41 @@ end))
 
 minConnections:Add(minimizeBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
+    print("Minimize clicked, isMinimized:", isMinimized)
+    print("tabs exists:", tabs ~= nil, "pages exists:", pages ~= nil, "profileFrame exists:", profileFrame ~= nil, "accent exists:", accent ~= nil)
+    
     if isMinimized then
         Utils.Tween(main, {
             Size = UDim2.new(0, CONSTANTS.MINIMIZED_SIZE.X, 0, CONSTANTS.MINIMIZED_SIZE.Y)
         }, 0.3)
         minimizeBtn.Text = "□"
-        tabs.Visible = false
-        pages.Visible = false
-        profileFrame.Visible = false
-        accent.Visible = false
+        
+        if tabs then 
+            tabs.Visible = false
+            print("Hid tabs")
+        end
+        if pages then 
+            pages.Visible = false
+            print("Hid pages")
+        end
+        if profileFrame then 
+            profileFrame.Visible = false
+            print("Hid profileFrame")
+        end
+        if accent then 
+            accent.Visible = false
+            print("Hid accent")
+        end
     else
         Utils.Tween(main, {
             Size = UDim2.new(0, CONSTANTS.MAIN_SIZE.X, 0, CONSTANTS.MAIN_SIZE.Y)
         }, 0.3)
         minimizeBtn.Text = "−"
-        tabs.Visible = true
-        pages.Visible = true
-        profileFrame.Visible = true
-        accent.Visible = true
+        
+        if tabs then tabs.Visible = true end
+        if pages then pages.Visible = true end
+        if profileFrame then profileFrame.Visible = true end
+        if accent then accent.Visible = true end
     end
     Utils.PlaySound()
 end))
@@ -1150,5 +1167,4 @@ task.delay(0.5, function()
         Type = "success"
     })
 end)
-
-return Library
+return Librar
