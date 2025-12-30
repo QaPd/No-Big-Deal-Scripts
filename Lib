@@ -1092,10 +1092,11 @@ function Library:CreateTab(name, icon)
         return divider
     end
     
- -- Add Keybind
+-- Add Keybind (Fixed Version)
 function Tab:AddKeybind(text, default, onKeySet, onKeyPressed)
     local currentKey = default or Enum.KeyCode.Unknown
     local listening = false
+    local keyConnection -- Store the key input connection separately
     
     local btn, label, hoverConn, leaveConn = createButton(text)
     
@@ -1163,35 +1164,45 @@ function Tab:AddKeybind(text, default, onKeySet, onKeyPressed)
     end))
     
     -- Listen for key input
-    Tab.Connections:Add(UIS.InputBegan:Connect(function(input, gameProcessed)
-        if listening then
-            -- Setting a new keybind
-            if input.UserInputType == Enum.UserInputType.Keyboard then
-                -- Allow clearing with Escape or Backspace
-                if input.KeyCode == Enum.KeyCode.Escape or input.KeyCode == Enum.KeyCode.Backspace then
-                    currentKey = Enum.KeyCode.Unknown
-                else
-                    currentKey = input.KeyCode
+    keyConnection = UIS.InputBegan:Connect(function(input, gameProcessed)
+        -- Wrap everything in pcall to catch errors
+        local success, err = pcall(function()
+            if listening then
+                -- Setting a new keybind
+                if input.UserInputType == Enum.UserInputType.Keyboard then
+                    -- Allow clearing with Escape or Backspace
+                    if input.KeyCode == Enum.KeyCode.Escape or input.KeyCode == Enum.KeyCode.Backspace then
+                        currentKey = Enum.KeyCode.Unknown
+                    else
+                        currentKey = input.KeyCode
+                    end
+                    
+                    listening = false
+                    updateDisplay()
+                    Utils.Tween(keybindBtn, {BackgroundColor3 = Theme.Panel})
+                    Utils.Tween(keybindBtn, {TextColor3 = Theme.Accent})
+                    Utils.PlaySound()
+                    
+                    -- Call the "key was set" callback
+                    if onKeySet then
+                        pcall(onKeySet, currentKey)
+                    end
                 end
-                
-                listening = false
-                updateDisplay()
-                Utils.Tween(keybindBtn, {BackgroundColor3 = Theme.Panel})
-                Utils.Tween(keybindBtn, {TextColor3 = Theme.Accent})
-                Utils.PlaySound()
-                
-                -- Call the "key was set" callback
-                if onKeySet then
-                    pcall(onKeySet, currentKey)
+            elseif input.UserInputType == Enum.UserInputType.Keyboard and currentKey ~= Enum.KeyCode.Unknown and input.KeyCode == currentKey then
+                -- Pressing the keybind to trigger action
+                -- Don't check gameProcessed here as it might prevent the keybind from working
+                if onKeyPressed then
+                    pcall(onKeyPressed, currentKey)
                 end
             end
-        elseif not gameProcessed and currentKey ~= Enum.KeyCode.Unknown and input.KeyCode == currentKey then
-            -- Pressing the keybind to trigger action
-            if onKeyPressed then
-                pcall(onKeyPressed, currentKey)
-            end
+        end)
+        
+        if not success then
+            warn("Keybind error:", err)
         end
-    end))
+    end)
+    
+    Tab.Connections:Add(keyConnection)
     
     updateDisplay()
     
@@ -1202,6 +1213,11 @@ function Tab:AddKeybind(text, default, onKeySet, onKeyPressed)
         end,
         GetKey = function()
             return currentKey
+        end,
+        Destroy = function()
+            if keyConnection then
+                keyConnection:Disconnect()
+            end
         end
     }
 end
