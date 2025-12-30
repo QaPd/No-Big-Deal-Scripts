@@ -730,31 +730,33 @@ function Library:CreateTab(name, icon)
         label.TextTruncate = Enum.TextTruncate.AtEnd
         label.Parent = btn
         
-        btn.MouseEnter:Connect(function()
+        local hoverConnection = btn.MouseEnter:Connect(function()
             Utils.Tween(btn, {BackgroundColor3 = Theme.ElementHover}, 0.15)
         end)
         
-        btn.MouseLeave:Connect(function()
+        local leaveConnection = btn.MouseLeave:Connect(function()
             if not btn:FindFirstChild("Active") then
                 Utils.Tween(btn, {BackgroundColor3 = Theme.Element}, 0.15)
             end
         end)
         
-        btn.MouseButton1Click:Connect(function()
-            Utils.Tween(btn, {Size = UDim2.new(1, -4, 0, CONSTANTS.BUTTON_HEIGHT - 2)}, 0.1)
-            task.wait(0.1)
-            Utils.Tween(btn, {Size = UDim2.new(1, 0, 0, CONSTANTS.BUTTON_HEIGHT)}, 0.1)
-            Utils.PlaySound()
-        end)
-        
-        return btn, label
+        return btn, label, hoverConnection, leaveConnection
     end
     
     -- Add Button
     function Tab:AddButton(text, callback)
-        local btn, label = createButton(text)
+        local btn, label, hoverConn, leaveConn = createButton(text)
+        
+        Tab.Connections:Add(hoverConn)
+        Tab.Connections:Add(leaveConn)
         
         Tab.Connections:Add(btn.MouseButton1Click:Connect(function()
+            -- Click animation
+            Utils.Tween(btn, {Size = UDim2.new(1, -4, 0, CONSTANTS.BUTTON_HEIGHT - 2)}, 0.1)
+            task.wait(0.1)
+            Utils.Tween(btn, {Size = UDim2.new(1, 0, 0, CONSTANTS.BUTTON_HEIGHT)}, 0.1)
+            Utils.PlaySound()
+            
             if callback then
                 pcall(callback)
             end
@@ -766,7 +768,10 @@ function Library:CreateTab(name, icon)
     -- Add Toggle
     function Tab:AddToggle(text, default, callback)
         local state = default or false
-        local btn, label = createButton(text)
+        local btn, label, hoverConn, leaveConn = createButton(text)
+        
+        Tab.Connections:Add(hoverConn)
+        Tab.Connections:Add(leaveConn)
         
         local indicator = Instance.new("Frame")
         indicator.Size = UDim2.new(0, 44, 0, 24)
@@ -804,6 +809,8 @@ function Library:CreateTab(name, icon)
                 end
                 Utils.Tween(btn, {BackgroundColor3 = Theme.Element})
             end
+            
+            Utils.PlaySound()
             
             if callback then
                 pcall(callback, state)
