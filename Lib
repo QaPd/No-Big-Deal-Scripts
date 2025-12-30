@@ -1099,8 +1099,8 @@ function Library:CreateTab(name, icon)
         return divider
     end
     
-    -- Add Keybind
-function Tab:AddKeybind(text, default, callback)
+ -- Add Keybind
+function Tab:AddKeybind(text, default, onKeySet, onKeyPressed)
     local currentKey = default or Enum.KeyCode.Unknown
     local listening = false
     
@@ -1172,6 +1172,7 @@ function Tab:AddKeybind(text, default, callback)
     -- Listen for key input
     Tab.Connections:Add(UIS.InputBegan:Connect(function(input, gameProcessed)
         if listening then
+            -- Setting a new keybind
             if input.UserInputType == Enum.UserInputType.Keyboard then
                 -- Allow clearing with Escape or Backspace
                 if input.KeyCode == Enum.KeyCode.Escape or input.KeyCode == Enum.KeyCode.Backspace then
@@ -1186,22 +1187,30 @@ function Tab:AddKeybind(text, default, callback)
                 Utils.Tween(keybindBtn, {TextColor3 = Theme.Accent})
                 Utils.PlaySound()
                 
-                if callback then
-                    pcall(callback, currentKey)
+                -- Call the "key was set" callback
+                if onKeySet then
+                    pcall(onKeySet, currentKey)
                 end
             end
-        -- CHANGED: Only trigger if gameProcessed is false AND the key matches
         elseif not gameProcessed and currentKey ~= Enum.KeyCode.Unknown and input.KeyCode == currentKey then
-            -- Trigger the keybind callback (this executes the actual keybind action)
-            if callback then
-                pcall(callback, currentKey)
+            -- Pressing the keybind to trigger action
+            if onKeyPressed then
+                pcall(onKeyPressed, currentKey)
             end
         end
     end))
     
     updateDisplay()
     
-    return btn, keybindBtn  -- CHANGED: Return the keybind button instead of controls table
+    return btn, {
+        SetKey = function(key)
+            currentKey = key or Enum.KeyCode.Unknown
+            updateDisplay()
+        end,
+        GetKey = function()
+            return currentKey
+        end
+    }
 end
     
     -- Add more components (input, dropdown, color picker) would follow similar improvements
