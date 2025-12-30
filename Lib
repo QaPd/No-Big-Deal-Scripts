@@ -1,7 +1,7 @@
--- RoohrHub UI Library v2.6 - Enhanced Edition
+-- RoohrHub UI Library v2.0
 -- Improved architecture, performance, and features
 
-print("RoohrLib v2.6 Enhanced")
+print("RoohrLib v2.0")
 
 -- Services
 local Players = game:GetService("Players")
@@ -168,9 +168,9 @@ function Utils.Debounce(func, delay)
     end
 end
 
--- Main GUI Setup
+-- GUI
 local gui = Instance.new("ScreenGui")
-gui.Name = "RoohrHub_Enhanced"
+gui.Name = "RoohrHub"
 gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = player:WaitForChild("PlayerGui")
@@ -224,7 +224,7 @@ local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -180, 1, 0)
 title.Position = UDim2.new(0, 50, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "RoohrHub Enhanced"
+title.Text = "RoohrHub"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 22
 title.TextColor3 = Theme.Text
@@ -236,7 +236,7 @@ local subtitle = Instance.new("TextLabel")
 subtitle.Size = UDim2.new(1, -180, 0, 12)
 subtitle.Position = UDim2.new(0, 50, 0, 28)
 subtitle.BackgroundTransparency = 1
-subtitle.Text = "v2.6 Enhanced • " .. player.Name
+subtitle.Text = "v2.0 • " .. player.Name
 subtitle.Font = Enum.Font.Gotham
 subtitle.TextSize = 11
 subtitle.TextColor3 = Theme.Muted
@@ -292,6 +292,7 @@ minConnections:Add(minimizeBtn.MouseButton1Click:Connect(function()
         tabs.Visible = false
         pages.Visible = false
         profileFrame.Visible = false
+        accent.Visible = false
     else
         Utils.Tween(main, {
             Size = UDim2.new(0, CONSTANTS.MAIN_SIZE.X, 0, CONSTANTS.MAIN_SIZE.Y)
@@ -300,6 +301,7 @@ minConnections:Add(minimizeBtn.MouseButton1Click:Connect(function()
         tabs.Visible = true
         pages.Visible = true
         profileFrame.Visible = true
+        accent.Visible = true
     end
     Utils.PlaySound()
 end))
@@ -1105,21 +1107,42 @@ function Library:Destroy()
         end
     end
     
-    pcall(function()
-        if gui and gui.Parent then
-            gui:Destroy()
-        end
-    end)
+    -- Don't destroy the GUI, just search for leftover ESP objects
+    print("RoohrHub: Searching for leftover ESP objects...")
     
-    gui = nil
-    print("RoohrHub: GUI destroyed successfully")
+    local espCount = 0
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BillboardGui") or obj:IsA("Highlight") or (obj:IsA("BoxHandleAdornment")) then
+            if obj.Name:match("ESP") or obj.Name:match("Tracer") or obj.Name:match("Chams") then
+                pcall(function()
+                    obj:Destroy()
+                    espCount = espCount + 1
+                end)
+            end
+        end
+    end
+    
+    -- Check CoreGui for ESP
+    local coreGui = game:GetService("CoreGui")
+    for _, obj in ipairs(coreGui:GetDescendants()) do
+        if obj:IsA("BillboardGui") or obj:IsA("Highlight") then
+            if obj.Name:match("ESP") or obj.Name:match("Tracer") or obj.Name:match("Chams") then
+                pcall(function()
+                    obj:Destroy()
+                    espCount = espCount + 1
+                end)
+            end
+        end
+    end
+    
+    print("RoohrHub: Removed " .. espCount .. " leftover ESP objects")
 end
 
 -- Welcome notification
 task.delay(0.5, function()
     Library:Notify({
         Title = "Welcome!",
-        Message = "RoohrHub v2.6 Enhanced loaded successfully",
+        Message = "RoohrHub v2.0 loaded successfully",
         Duration = 3,
         Type = "success"
     })
