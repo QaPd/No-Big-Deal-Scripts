@@ -534,13 +534,6 @@ minConnections:Add(minimizeBtn.MouseButton1Click:Connect(function()
     Utils.PlaySound()
 end))
 
--- Minimize keybind
-minConnections:Add(UIS.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Settings.MinimizeKey then
-        minimizeBtn.MouseButton1Click:Fire()
-    end
-end))
-
 -- Library Object
 local Library = {}
 Library.Tabs = {}
