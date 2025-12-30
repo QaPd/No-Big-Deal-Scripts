@@ -1,7 +1,7 @@
 -- RoohrHub UI Library v2.6 - Enhanced Edition
 -- Improved architecture, performance, and features
 
-print("RoohrLib v2.7 Enhanced")
+print("RoohrLib v2.6 Enhanced")
 
 -- Services
 local Players = game:GetService("Players")
@@ -379,7 +379,7 @@ profilePicture.Size = UDim2.new(0, 48, 0, 48)
 profilePicture.Position = UDim2.new(0, 8, 0, 8)
 profilePicture.BackgroundColor3 = Theme.Element
 profilePicture.BorderSizePixel = 0
-profilePicture.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. player.UserId .. "&width=48&height=48&format=png"
+profilePicture.Image = "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=48&h=48"
 profilePicture.Parent = profileFrame
 
 Utils.CreateCorner(profilePicture, UDim.new(0, 8))
@@ -431,7 +431,7 @@ hwidLabel.Size = UDim2.new(1, 0, 0, 14)
 hwidLabel.Position = UDim2.new(0, 0, 1, -18)
 hwidLabel.BackgroundTransparency = 1
 hwidLabel.Text = "HWID: " .. getHWID()
-hwidLabel.Font = Enum.Font.GothamMono
+hwidLabel.Font = Enum.Font.Code
 hwidLabel.TextSize = 9
 hwidLabel.TextColor3 = Theme.Muted
 hwidLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -519,7 +519,7 @@ Library.Connections = ConnectionManager.new()
 Library.ActiveNotifications = 0
 
 -- Enhanced Notification System
-function Library:Notify(options)
+function Library:Notify(options, ...)
     -- Support both old and new API
     local title, message, duration, notifType
     
@@ -530,10 +530,11 @@ function Library:Notify(options)
         notifType = options.Type or options.type or "info"
     else
         -- Legacy API support
-        title = options
-        message = arguments[2] or ""
-        duration = arguments[3] or CONSTANTS.NOTIFICATION_DURATION
-        notifType = arguments[4] or "info"
+        local args = {...}
+        title = options or "Notification"
+        message = args[1] or ""
+        duration = args[2] or CONSTANTS.NOTIFICATION_DURATION
+        notifType = args[3] or "info"
     end
     
     -- Limit notifications
