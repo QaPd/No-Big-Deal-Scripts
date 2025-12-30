@@ -1167,4 +1167,4 @@ task.delay(0.5, function()
         Type = "success"
     })
 end)
-return Librar
+return Library
