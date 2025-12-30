@@ -1,7 +1,7 @@
 -- RoohrHub UI Library v2.6 - Enhanced Edition
 -- Improved architecture, performance, and features
 
-print("RoohrLib v2.6 Enhanced")
+print("RoohrLib v2.7 Enhanced")
 
 -- Services
 local Players = game:GetService("Players")
